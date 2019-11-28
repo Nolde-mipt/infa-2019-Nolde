@@ -3,8 +3,6 @@ import tkinter as tk
 import math
 import time
 
-# print (dir(math))
-
 root = tk.Tk()
 fr = tk.Frame(root)
 root.geometry('800x600')
@@ -13,15 +11,14 @@ canv.pack(fill=tk.BOTH, expand=1)
 
 
 class ball():
-    def __init__(self, xgun, ygun):
+    def __init__(self, g):
         """ Конструктор класса ball
 
         Args:
-        xgun - начальное положение мяча по горизонтали
-        ygun - начальное положение мяча по вертикали
+        g - пушка, из которой производится выстрел
         """
-        self.x = xgun
-        self.y = ygun
+        self.x = g.xgun
+        self.y = g.ygun
         self.r = 10
         self.vx = 0
         self.vy = 0
@@ -81,6 +78,8 @@ class gun():
         self.f2_power = 10
         self.f2_on = 0
         self.an = 1
+        self.xgun = 40
+        self.ygun = 450
         self.id = canv.create_line(20,450,50,420,width=7)
 
     def fire2_start(self, event):
@@ -94,7 +93,7 @@ class gun():
         """
         global balls, bullet
         bullet += 1
-        new_ball = ball(xgun, ygun)
+        new_ball = ball(self)
         new_ball.r += 5
         self.an = math.atan2((event.y-new_ball.y), (event.x-new_ball.x))
         new_ball.vx = self.f2_power * math.cos(self.an)
@@ -106,14 +105,14 @@ class gun():
     def targetting(self, event=0):
         """Прицеливание. Зависит от положения мыши."""
         if event:
-            self.an = math.atan2((event.y-ygun), (event.x-xgun))
+            self.an = math.atan2((event.y-self.ygun), (event.x-self.xgun))
         if self.f2_on:
             canv.itemconfig(self.id, fill='orange')
         else:
             canv.itemconfig(self.id, fill='black')
-        canv.coords(self.id, xgun, ygun,
-                    xgun + max(self.f2_power, 20) * math.cos(self.an),
-                    ygun + max(self.f2_power, 20) * math.sin(self.an)
+        canv.coords(self.id, self.xgun, self.ygun,
+                    self.xgun + max(self.f2_power, 20) * math.cos(self.an),
+                    self.ygun + max(self.f2_power, 20) * math.sin(self.an)
                     )
 
     def power_up(self):
@@ -124,21 +123,17 @@ class gun():
         else:
             canv.itemconfig(self.id, fill='black')
     def gun_up(self, event) :
-        global ygun
-        if ygun >= 5 :
-            ygun -= 5
+        if self.ygun >= 5 :
+            self.ygun -= 5
     def gun_left(self, event) :
-        global xgun
-        if xgun >= 5 :
-            xgun -= 5
+        if self.xgun >= 5 :
+            self.xgun -= 5
     def gun_down(self, event) :
-        global ygun
-        if ygun <= 585 :
-            ygun += 5
+        if self.ygun <= 585 :
+            self.ygun += 5
     def gun_right(self, event) :
-        global xgun
-        if xgun <= 785 :
-            xgun += 5
+        if self.xgun <= 785 :
+            self.xgun += 5
 
 
 class target():
@@ -171,7 +166,7 @@ class target():
 
 
 def new_game(event=''):
-    global gun, t1, t2, screen1, balls, bullet, points, points_count, xgun, ygun
+    global gun, t1, t2, screen1, balls, bullet, points, points_count
     t1.new_target()
     t2.new_target()
     bullet = 0
@@ -187,8 +182,6 @@ def new_game(event=''):
     tau = 3000
     t1.live = 1
     t2.live = 1
-    xgun = 40
-    ygun = 450
     while t1.live or t2.live or balls:
         t1.target_move()
         t2.target_move()
